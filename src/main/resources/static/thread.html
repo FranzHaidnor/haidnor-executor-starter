@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>thread pool monitor</title>
+    <script src="./vue.js"></script>
+    <script src="./axios.min.js"></script>
+</head>
+
+<body>
+<div id="app">
+
+    <p>线程池参数实时监控</p>
+    <div>
+        <table border="1">
+            <tr>
+                <td>takeStatus 获取任务状态</td>
+                <td v-html="info.takeStatus"></td>
+            </tr>
+            <tr>
+                <td>poolSize 存活线程数数</td>
+                <td v-html="info.poolSize"></td>
+            </tr>
+            <tr>
+                <td>corePoolSize 核心线程数</td>
+                <td style="width: 100px;" v-html="info.corePoolSize"></td>
+            </tr>
+            <tr>
+                <td>maximumPoolSize 最大线程数</td>
+                <td v-html="info.maximumPoolSize"></td>
+            </tr>
+            <tr>
+                <td>largestPoolSize 池中同时进行的最大线程数</td>
+                <td v-html="info.largestPoolSize"></td>
+            </tr>
+            <tr>
+                <td>activeCount 正在执行任务的线程数</td>
+                <td v-html="info.activeCount"></td>
+            </tr>
+            <tr>
+                <td>queueSize 任务缓冲区中的任务数</td>
+                <td v-html="info.queueSize"></td>
+            <tr>
+            <tr>
+                <td>keepAliveTime 线程存活时间(秒)</td>
+                <td v-html="info.keepAliveTime"></td>
+            <tr>
+                <td>queueCapacity 任务队列最大容量</td>
+                <td v-html="info.capacity"></td>
+            </tr>
+            <tr>
+                <td>completedTaskCount 已完成任务数</td>
+                <td v-html="info.completedTaskCount"></td>
+            </tr>
+            <tr>
+                <td>throughput 当前处理任务吞吐量(个/秒)</td>
+                <td v-html="info.throughput"></td>
+            </tr>
+        </table>
+    </div>
+    <p>线程池参数设置</p>
+    <div>
+        <table border="1">
+            <tr>
+                <td>corePoolSize 核心线程数</td>
+                <td>
+                    <input v-model:value="param.corePoolSize"/>
+                </td>
+                <td>
+                    <button v-on:click="setCorePoolSize">update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>maximumPoolSize 最大线程数</td>
+                <td>
+                    <input v-model:value="param.maximumPoolSize"/>
+                </td>
+                <td>
+                    <button v-on:click="setMaximumPoolSize">update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>keepAliveTime 线程空闲存活时间(秒)</td>
+                <td>
+                    <input v-model:value="param.keepAliveTime"/>
+                </td>
+                <td>
+                    <button v-on:click="setKeepAliveTime">update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>queueCapacity 队列最大容量</td>
+                <td>
+                    <input v-model:value="param.capacity"/>
+                </td>
+                <td>
+                    <button v-on:click="setCapacity">update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>takeStatus 消费任务状态</td>
+                <td>
+                    <select v-model:value="param.takeStatus">
+                        <option>true</option>
+                        <option>false</option>
+                    </select>
+                </td>
+                <td>
+                    <button v-on:click="setTakeStatus">update</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            lastCompletedTaskCount: 0,  // 线程池执行完任务总数
+            info: {
+                poolSize: null,          // 线程池内存活的线程数
+                corePoolSize: null,      // 核心线程数
+                maximumPoolSize: null,   // 最大线程数
+                activeCount: null,       // 正在执行任务的线程数
+                largestPoolSize: null,   // 同时进行的最大线程数
+                queueSize: null,         // 当前任务数量
+                taskCount: null,         // (线程池队列中排队的任务)计划执行的任务的大概总数
+                keepAliveTime: null,     // 线程存活时间
+                completedTaskCount: null,// 已经完成的任务数量
+                poolInfo: null,          // 线程池信息
+                takeStatus: null,        // 线程池获取任务队列状态
+                capacity: null,          // 任务队列最大容量
+                throughput: null          // 当前处理任务吞吐量(个/秒)
+            },
+            param: {
+                requestURL: '',
+                xxl_sso_sessionid: '',
+                corePoolSize: 1,
+                maximumPoolSize: 1,
+                capacity: 1024,
+                keepAliveTime: 30,
+                takeStatus: true,
+            }
+        },
+        filters: {},
+        methods: {
+            // 设置核心线程数
+            setCorePoolSize: function () {
+                axios({
+                    method: 'post',
+                    url: this.param.requestURL + '/threadPool/setCorePoolSize',
+                    params: {
+                        corePoolSize: this.param.corePoolSize
+                    }
+                }).then(res => {
+                    console.log(res)
+                }).catch(err => {
+                    console.error(err);
+                })
+            },
+            // 设置最大线程数
+            setMaximumPoolSize: function () {
+                axios({
+                    method: 'post',
+                    url: this.param.requestURL + '/threadPool/setMaximumPoolSize',
+                    params: {
+                        maximumPoolSize: this.param.maximumPoolSize
+                    }
+                }).then(res => {
+                    console.log(res)
+                }).catch(err => {
+                    console.error(err);
+                })
+            },
+            // 设置最大线程数
+            setCapacity: function () {
+                axios({
+                    method: 'post',
+                    url: this.param.requestURL + '/threadPool/setCapacity',
+                    params: {
+                        capacity: this.param.capacity
+                    }
+                }).then(res => {
+                    console.log(res)
+                }).catch(err => {
+                    console.error(err);
+                })
+            },
+            // 设置线程获取任务队列状态
+            setTakeStatus: function () {
+                axios({
+                    method: 'post',
+                    url: this.param.requestURL + '/threadPool/setTakeStatus',
+                    params: {
+                        takeStatus: this.param.takeStatus
+                    }
+                }).then(res => {
+                    console.log(res)
+                }).catch(err => {
+                    console.error(err);
+                })
+            },
+            // 设置线程存活时间
+            setKeepAliveTime: function () {
+                axios({
+                    method: 'post',
+                    url: this.param.requestURL + '/threadPool/setKeepAliveTime',
+                    params: {
+                        keepAliveTime: this.param.keepAliveTime
+                    }
+                }).then(res => {
+                    console.log(res)
+                }).catch(err => {
+                    console.error(err);
+                })
+            }
+        },
+        mounted() {
+            let data = this;
+            setInterval(function () {
+                axios({
+                    method: 'get',
+                    url: data.param.requestURL + "/threadPool/getCurrentThreadPoolInfo",
+                }).then(res => {
+                    data.info.corePoolSize = res.data.corePoolSize;
+                    data.info.maximumPoolSize = res.data.maximumPoolSize;
+                    data.info.largestPoolSize = res.data.largestPoolSize;
+                    data.info.poolSize = res.data.poolSize;
+                    data.info.taskCount = res.data.taskCount;
+                    data.info.activeCount = res.data.activeCount;
+                    data.info.keepAliveTime = res.data.keepAliveTime;
+                    data.info.queueSize = res.data.queueSize;
+                    data.info.poolInfo = res.data.poolInfo;
+                    data.info.capacity = res.data.capacity;
+                    data.info.takeStatus = res.data.takeStatus;
+
+                    // 吞吐量 = 本次完成总数 - 上一次完成总数
+                    b = parseInt(data.lastCompletedTaskCount) === parseInt(res.data.completedTaskCount);
+                    if (b) {
+                        data.info.throughput = 0;
+                    } else {
+                        data.info.throughput = res.data.completedTaskCount - data.lastCompletedTaskCount;
+                    }
+                    // 总完成量 = 本次请求获取的总完成量
+                    data.info.completedTaskCount = res.data.completedTaskCount;
+                    // 上一次的完成量 = 本次请求获取的总完成量
+                    data.lastCompletedTaskCount = res.data.completedTaskCount;
+                }).catch(err => {
+                    // console.error(err);
+                    data.info.corePoolSize = 0;
+                    data.info.maximumPoolSize = 0;
+                    data.info.largestPoolSize = 0;
+                    data.info.poolSize = 0;
+                    data.info.taskCount = 0;
+                    data.info.activeCount = 0;
+                    data.info.completedTaskCount = 0;
+                    data.info.keepAliveTime = 0;
+                    data.info.queueSize = 0;
+                    data.info.poolInfo = 0;
+                    data.info.capacity = 0;
+                    data.lastCompletedTaskCount = 0;
+                    data.info.throughput = 0;
+                    data.info.takeStatus = false;
+                })
+            }, 1000);
+        },
+        components: {}
+    });
+</script>
+
+</html>
