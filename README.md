@@ -14,3 +14,8 @@ Java 动态弹性线程池实现。快速集成于 SpringBoot 项目。提供 WE
 服务启动后访问链接 http://127.0.0.1:8080/thread.html 可进入线程池控制台。可对线程池进行动态设置。
 ![](./doc/images/image01.png)
 
+# API
+获取动态线程池
+```java
+ThreadPoolExecutor executor = ThreadPoolService.getExecutor();
+```
